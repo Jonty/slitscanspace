@@ -1,0 +1,57 @@
+<head>
+    <title>S L I T S C A N S P A C E</title>
+    <style>
+        body,html{margin:0}
+        canvas { width:100%; height:100% }
+	video { display: none }
+    </style>
+    <script type="text/javascript">
+	    function slitscan() {
+
+		navigator.getUserMedia  = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+		if ( !navigator.getUserMedia ) { alert("Oh no, I failed to access your webcam :(") }
+
+		var canvas = document.getElementById('canvas');
+		var video = document.getElementById('video')
+		var ctx = canvas.getContext('2d');
+
+		var ctx = canvas.getContext("2d");
+		ctx.font = "30px Helvetica";
+		ctx.textAlign = "center";
+		ctx.strokeText("S L I T S C A N S P A C E",canvas.width/2, canvas.height/2);
+		ctx.strokeText("by @jonty",canvas.width/2, (canvas.height/4)*3);
+
+		function getWebcam(){
+			navigator.getUserMedia({video: true, audio: false}, function(stream) {
+				video.srcObject = stream;
+			}, function(e) {
+				alert("Oh no, I failed to access your webcam :(");
+				console.error('Failed to get webcam stream', e);
+			});
+		}
+
+		var loopFrame
+		function loop(){
+			loopFrame = requestAnimationFrame(loop);
+			var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+			ctx.putImageData(imageData, 1, 0);
+			ctx.drawImage(video, 0, 0, 1, canvas.height);
+		}
+
+		function startLoop(){
+			loopFrame = loopFrame || requestAnimationFrame(loop);
+		}
+
+		video.addEventListener('loadedmetadata',function(){
+			startLoop();
+		});
+
+		getWebcam();
+	    }
+    </script>
+</head>
+<body onload="slitscan()">
+    <video id="video" autoplay=true></video>
+    <canvas id="canvas" width="720" height="720"></canvas>
+</body>
