@@ -35,8 +35,8 @@
 		function loop(){
 			loopFrame = requestAnimationFrame(loop);
 			var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-			ctx.putImageData(imageData, 1, 0);
-			ctx.drawImage(video, 0, 0, 1, canvas.height);
+			ctx.putImageData(imageData, -1, 0);
+			ctx.drawImage(video, canvas.width-1, 0, 1, canvas.height);
 		}
 
 		function startLoop(){
