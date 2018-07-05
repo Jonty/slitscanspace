@@ -1,8 +1,11 @@
 <head>
     <title>S L I T S C A N S P A C E</title>
     <style>
-        body,html{ margin:0 }
-        canvas { width:100%; height:100% }
+        body, html{
+	    width:  100%;
+	    height: 100%;
+	    margin: 0px;
+	}
 	video { display: none }
     </style>
     <script type="text/javascript">
@@ -40,47 +43,72 @@
 		var video = document.getElementById('video')
 		var ctx = canvas.getContext('2d');
 
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
 		var ctx = canvas.getContext("2d");
-		ctx.font = "30px Helvetica";
+		ctx.font = "40px Helvetica";
 		ctx.textAlign = "center";
 		ctx.strokeText("S L I T S C A N S P A C E",canvas.width/2, canvas.height/2);
-		ctx.strokeText("by @jonty",canvas.width/2, (canvas.height/4)*3);
+		ctx.font = "20px Helvetica";
+		ctx.strokeText("by @jonty",canvas.width/2, (canvas.height/2)+100);
+
+		ctx.font = "10px Helvetica";
+		ctx.fillText("space = ⏯    s = 💾",canvas.width/2, (canvas.height-30));
 
 		function getWebcam(){
-			window.navigator.mediaDevices.getUserMedia({video: true, audio: false}).then(function(stream) {
-			    if ("srcObject" in video) {
-				video.srcObject = stream;
-			    } else {
-				video.src = window.URL.createObjectURL(stream);
-			    }
-			    video.play()
-			}).catch(function(e) {
-				alert("Oh no, I failed to access your webcam :(");
-				console.error('Failed to get webcam stream', e);
-			});
+		    window.navigator.mediaDevices.getUserMedia({video: true, audio: false}).then(function(stream) {
+			if ("srcObject" in video) {
+			    video.srcObject = stream;
+			} else {
+			    video.src = window.URL.createObjectURL(stream);
+			}
+			video.play()
+		    }).catch(function(e) {
+			alert("Oh no, I failed to access your webcam :(");
+			console.error('Failed to get webcam stream', e);
+		    });
 		}
 
 		var loopFrame
-		function loop(){
-			loopFrame = requestAnimationFrame(loop);
+		var playing = true
+		function loop() {
+		    loopFrame = requestAnimationFrame(loop);
+		    if (playing) {
 			var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 			ctx.putImageData(imageData, -1, 0);
 			ctx.drawImage(video, canvas.width-1, 0, 1, canvas.height);
-		}
-
-		function startLoop(){
-			loopFrame = loopFrame || requestAnimationFrame(loop);
+		    }
 		}
 
 		video.addEventListener('loadedmetadata',function(){
-			startLoop();
+		    loopFrame = loopFrame || requestAnimationFrame(loop);
 		});
+
+		function handleKey(e) {
+		    switch (e.keyCode) {
+			case 32:
+			    // Space, pause/play
+			    playing = !playing
+			    break
+			case 83:
+			    // s, save image
+			    var link = document.createElement('a');
+			    var cd = new Date();
+			    link.download = "slitscan_space_" + cd.getFullYear() + (cd.getMonth()+1) + cd.getDate() + "_" + cd.getHours() + cd.getMinutes() + cd.getSeconds() + ".png";
+			    link.href = canvas.toDataURL()
+			    link.click();
+			    link.parentNode.removeChild(link);
+			    break
+		    }
+		}
+		window.addEventListener('keydown',handleKey,false);
 
 		getWebcam();
 	    }
     </script>
 </head>
 <body onload="slitscan()">
-    <canvas id="canvas" width="720" height="720"></canvas>
+    <canvas id="canvas"></canvas>
     <video id="video" playsinline muted></video>
 </body>
