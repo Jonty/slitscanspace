@@ -98,8 +98,8 @@
 		});
 
 		function changeWebcam() {
-		    cam = cameras.pop(0);
-		    cameras.push(cam);
+		    cam = cameras.pop();
+		    cameras.unshift(cam);
 		    getWebcam();
 		}
 
