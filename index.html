@@ -54,10 +54,22 @@
 		ctx.strokeText("by @jonty",canvas.width/2, (canvas.height/2)+100);
 
 		ctx.font = "10px Helvetica";
-		ctx.fillText("space = ⏯    s = 💾",canvas.width/2, (canvas.height-30));
+		ctx.fillText("tap / 's' = 💾    hold / 'c' = change cam",canvas.width/2, (canvas.height-30));
 
-		function getWebcam(){
-		    window.navigator.mediaDevices.getUserMedia({video: true, audio: false}).then(function(stream) {
+		var cameras = [];
+
+		function gotDevices(md) {
+		    md.forEach(device => {
+			if (device.kind === 'videoinput') {
+			    cameras.push(device.deviceId);
+			}
+		    });
+
+		    getWebcam();
+		}
+
+		function getWebcam() {
+		    window.navigator.mediaDevices.getUserMedia({video: {deviceId: { exact: cameras[0]}}, audio: false}).then(function(stream) {
 			if ("srcObject" in video) {
 			    video.srcObject = stream;
 			} else {
@@ -85,26 +97,68 @@
 		    loopFrame = loopFrame || requestAnimationFrame(loop);
 		});
 
+		function changeWebcam() {
+		    cam = cameras.pop(0);
+		    cameras.push(cam);
+		    getWebcam();
+		}
+
+		function saveImage() {
+		    var link = document.createElement('a');
+		    var cd = new Date();
+		    link.download = "slitscan_space_" + cd.getFullYear() + (cd.getMonth()+1) + cd.getDate() + "_" + cd.getHours() + cd.getMinutes() + cd.getSeconds() + ".png";
+		    link.href = canvas.toDataURL()
+		    link.click();
+		    link.parentNode.removeChild(link);
+		}
+
 		function handleKey(e) {
 		    switch (e.keyCode) {
 			case 32:
 			    // Space, pause/play
 			    playing = !playing
-			    break
+			    break;
 			case 83:
 			    // s, save image
-			    var link = document.createElement('a');
-			    var cd = new Date();
-			    link.download = "slitscan_space_" + cd.getFullYear() + (cd.getMonth()+1) + cd.getDate() + "_" + cd.getHours() + cd.getMinutes() + cd.getSeconds() + ".png";
-			    link.href = canvas.toDataURL()
-			    link.click();
-			    link.parentNode.removeChild(link);
+			    saveImage();
+			    break;
+			case 67:
+			    // c, change camera
+			    changeWebcam();
 			    break
 		    }
 		}
 		window.addEventListener('keydown',handleKey,false);
 
-		getWebcam();
+		// Change webcam on long press, or save on tap
+		var timer;
+		var tapTime;
+
+		canvas.addEventListener("touchstart", touchStart, false);
+		canvas.addEventListener("mousedown", touchStart, false);
+		function touchStart(event) {
+		    timer = window.setTimeout(changeWebcam, 1000);
+		    tapTime = +new Date();
+		    event.preventDefault();
+		    return false;
+		}
+
+		canvas.addEventListener("touchend", touchEnd, false);
+		canvas.addEventListener("mouseup", touchEnd, false);
+		function touchEnd(event) {
+		    clearTimeout(timer);
+
+		    elapsed = (+new Date() - tapTime);
+		    console.log("Elapsed: " + elapsed)
+		    if (elapsed < 1000) {
+			saveImage();
+		    }
+
+		    event.preventDefault();
+		    return false;
+		}
+
+		window.navigator.mediaDevices.enumerateDevices().then(gotDevices);
 	    }
     </script>
 </head>
