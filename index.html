@@ -59,9 +59,10 @@
 		var cameras = [];
 
 		function gotDevices(md) {
+		    var count = 1;
 		    md.forEach(device => {
 			if (device.kind === 'videoinput') {
-			    cameras.push(device.deviceId);
+			    cameras.push([device.label || `Camera ${count++}`, device.deviceId]);
 			}
 		    });
 
@@ -69,7 +70,7 @@
 		}
 
 		function getWebcam() {
-		    window.navigator.mediaDevices.getUserMedia({video: {deviceId: { exact: cameras[0]}}, audio: false}).then(function(stream) {
+		    window.navigator.mediaDevices.getUserMedia({video: {deviceId: { exact: cameras[0][1]}}, audio: false}).then(function(stream) {
 			if ("srcObject" in video) {
 			    video.srcObject = stream;
 			} else {
@@ -101,6 +102,7 @@
 		    cam = cameras.pop();
 		    cameras.unshift(cam);
 		    getWebcam();
+		    alert("Switched to " + cameras[0][0]);
 		}
 
 		function saveImage() {
