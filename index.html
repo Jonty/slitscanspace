@@ -65,7 +65,9 @@
 			    cameras.push([device.label || `Camera ${count++}`, device.deviceId]);
 			}
 		    });
+		    cameras.reverse();
 
+		    console.log("Found devices:", cameras);
 		    getWebcam();
 		}
 
@@ -160,7 +162,11 @@
 		    return false;
 		}
 
-		window.navigator.mediaDevices.enumerateDevices().then(gotDevices);
+		window.navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(
+		    function() {
+			window.navigator.mediaDevices.enumerateDevices().then(gotDevices);
+		    }
+		);
 	    }
     </script>
 </head>
