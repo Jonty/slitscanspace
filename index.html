@@ -162,7 +162,7 @@
 		    return false;
 		}
 
-		window.navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(
+		window.navigator.mediaDevices.getUserMedia({video: true}).then(
 		    function() {
 			window.navigator.mediaDevices.enumerateDevices().then(gotDevices);
 		    }
